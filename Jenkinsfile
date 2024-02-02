@@ -20,10 +20,16 @@ pipeline {
         stage('Clear Previous Image') {
             steps {
                 script{
-                    try {    
+                    try {
+                        sh 'docker rmi -f $(docker images -f "dangling=true" -q)'
+                    } catch (err) {
+                        echo "don't have any dangling image"
+                    }
+                    try {
+                        sh 'docker rmi -f $(docker images -f "dangling=true" -q)'
                         sh 'docker rmi -f $(docker images -q --filter "before=docker.skrss.com:5000/gitops-webapp:${BUILD_NUMBER}" docker.skrss.com:5000/gitops-webapp)'
                     } catch (err) {
-                        echo "don't have any Previous Image"
+                        echo "don't have any previous image"
                     }
                 }
             }
