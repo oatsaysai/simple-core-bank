@@ -9,7 +9,7 @@ pipeline {
         }
         stage('Docker Build') {
             steps {
-                sh 'docker build -t docker.skrss.com:5000/gitops-webapp:${BUILD_NUMBER} .'
+                sh 'docker build --rm -t docker.skrss.com:5000/gitops-webapp:${BUILD_NUMBER} .'
             }
         }
         stage('Push Docker Imahe') {
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script{
                     try {
-                        sh 'docker rmi $(docker images -q --filter "before=docker.skrss.com:5000/gitops-webapp:${BUILD_NUMBER}" docker.skrss.com:5000/gitops-webapp)'
+                        sh 'docker rmi -f $(docker images -q --filter "before=docker.skrss.com:5000/gitops-webapp:${BUILD_NUMBER}" docker.skrss.com:5000/gitops-webapp)'
                     } catch (err) {
                         echo "don't have any Previous Image"
                     }
