@@ -92,7 +92,7 @@ func (ctx *Context) GetAccount(params *model.GetAccountParams) (*model.GetAccoun
 	accNo, accName, balance, err := ctx.DB.GetAccount(accountNo)
 	if err != nil {
 		logger.Errorf("Failed to get account: %s", err)
-		return nil, &custom_error.InternalError{
+		return nil, &custom_error.UserError{
 			Code:    custom_error.AccountNoNotFound,
 			Message: "account_no not found",
 		}
