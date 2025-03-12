@@ -2,17 +2,17 @@ version: '3.9'
 
 services:
   postgres:
-    image: postgres:14-alpine
+    image: postgres:16-alpine
     container_name: postgres
     user: postgres
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-simple_core_bank}
+      POSTGRES_DB: ${POSTGRES_DB:-go-http-server-template}
       TZ: Asia/Bangkok
     ports:
-      - '5433:5432'
+      - '5432:5432'
     networks:
-      -  simple-core-bank-network
+      -  go-http-server-template-network
     restart: always
     healthcheck:
       test: pg_isready
@@ -20,9 +20,9 @@ services:
       timeout: 5s
       retries: 5
 
-  simple-core-bank:
-    image: simple-core-bank
-    container_name: simple-core-bank
+  go-http-server-template:
+    image: go-http-server-template
+    container_name: go-http-server-template
     build: .
     volumes:
       - ./cfg/config.docker.yaml:/cfg/config.yaml:ro
@@ -40,8 +40,8 @@ services:
         'run-without-build'
       ]
     networks:
-      - simple-core-bank-network
+      - go-http-server-template-network
 
 networks:
-  simple-core-bank-network:
+  go-http-server-template-network:
     driver: bridge

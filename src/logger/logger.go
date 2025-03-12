@@ -3,7 +3,7 @@ package logger
 import "errors"
 
 // Fields Type to pass when we want to call WithFields for structured logging
-type Fields map[string]interface{}
+type Fields map[string]any
 
 const (
 	//Debug has verbose message
@@ -29,61 +29,61 @@ var (
 
 // Logger is our contract for the logger
 type Logger interface {
-	// Debugf(format string, args ...interface{})
+	// Debugf(format string, args ...any)
 
-	// Infof(format string, args ...interface{})
+	// Infof(format string, args ...any)
 
-	// Warnf(format string, args ...interface{})
+	// Warnf(format string, args ...any)
 
-	// Errorf(format string, args ...interface{})
+	// Errorf(format string, args ...any)
 
-	// Fatalf(format string, args ...interface{})
+	// Fatalf(format string, args ...any)
 
-	// Panicf(format string, args ...interface{})
+	// Panicf(format string, args ...any)
 
 	WithFields(keyValues Fields) Logger
 
-	Fatal(v ...interface{})
+	Fatal(v ...any)
 
-	Fatalf(format string, v ...interface{})
+	Fatalf(format string, v ...any)
 
-	Fatalln(v ...interface{})
+	Fatalln(v ...any)
 
-	Panic(v ...interface{})
+	Panic(v ...any)
 
-	Panicf(format string, v ...interface{})
+	Panicf(format string, v ...any)
 
-	Panicln(v ...interface{})
+	Panicln(v ...any)
 
-	Print(v ...interface{})
+	Print(v ...any)
 
-	Printf(format string, v ...interface{})
+	Printf(format string, v ...any)
 
-	Println(v ...interface{})
+	Println(v ...any)
 
-	Debug(args ...interface{})
+	Debug(args ...any)
 
-	Debugf(format string, args ...interface{})
+	Debugf(format string, args ...any)
 
-	Debugln(args ...interface{})
+	Debugln(args ...any)
 
-	Info(args ...interface{})
+	Info(args ...any)
 
-	Infof(format string, args ...interface{})
+	Infof(format string, args ...any)
 
-	Infoln(args ...interface{})
+	Infoln(args ...any)
 
-	Warn(args ...interface{})
+	Warn(args ...any)
 
-	Warnf(format string, args ...interface{})
+	Warnf(format string, args ...any)
 
-	Warnln(args ...interface{})
+	Warnln(args ...any)
 
-	Error(args ...interface{})
+	Error(args ...any)
 
-	Errorf(format string, args ...interface{})
+	Errorf(format string, args ...any)
 
-	Errorln(args ...interface{})
+	Errorln(args ...any)
 }
 
 // Configuration stores the config for the logger

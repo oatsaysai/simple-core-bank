@@ -2,21 +2,24 @@ package db
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"time"
+	"errors"
 
-	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/tracelog"
-	log "github.com/oatsaysai/simple-core-bank/src/logger"
+	"github.com/shopspring/decimal"
+	postgresql "repo.blockfint.com/sakkarin/go-http-server-template/src/db/postgres"
+	log "repo.blockfint.com/sakkarin/go-http-server-template/src/logger"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/model"
 )
 
 type DB interface {
-	DBAccountInterface
-	DBTransferInterface
-	DBTransactionInterface
+	GetAccount(ctx context.Context, accountNo string) (*string, *string, *decimal.Decimal, error)
+	AccountExists(ctx context.Context, accountNo string) (bool, error)
+	GetAccountNoAndInsertAccount(ctx context.Context, accountName string, balance decimal.Decimal) (string, error)
+	PreGenerateAccountNo(ctx context.Context, batchSize int) error
+	GetTransactionByAccountNo(ctx context.Context, accountNo string) ([]model.Transaction, error)
+	TransferIn(ctx context.Context, toAccountNo string, amount decimal.Decimal) (*int64, error)
+	TransferOut(ctx context.Context, fromAccountNo string, amount decimal.Decimal) (*int64, error)
+	Transfer(ctx context.Context, fromAccountNo, toAccountNo string, amount decimal.Decimal) (*int64, error)
 
 	Close() error
 }
@@ -24,54 +27,20 @@ type DB interface {
 type PostgresqlDB struct {
 	logger log.Logger
 	DB     *pgxpool.Pool
-	Config *Config
 }
 
-func New(config *Config, logger log.Logger) (pgdb *PostgresqlDB, err error) {
-	pgdb = &PostgresqlDB{
-		logger: logger.WithFields(log.Fields{
-			"package": "db",
-		}),
-	}
-	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable search_path=%s",
-		config.DBHost,
-		config.DBPort,
-		config.DBUsername,
-		config.DBPassword,
-		config.DBName,
-		config.DBSchemaName,
-	)
+func New(config *Config, logger log.Logger) (db DB, err error) {
+	switch config.DBType {
+	case "postgres":
+		dbConfig, err := postgresql.InitConfig()
+		if err != nil {
+			return nil, err
+		}
 
-	var connectConf, _ = pgxpool.ParseConfig(connStr)
-	connectConf.MaxConns = config.MaxOpenConns
-	connectConf.MaxConns = config.MaxOpenConns
-	connectConf.HealthCheckPeriod = 15 * time.Second
-	connectConf.ConnConfig.Tracer = &tracelog.TraceLog{
-		Logger:   NewDatabaseLogger(&pgdb.logger),
-		LogLevel: tracelog.LogLevelTrace,
+		return postgresql.New(dbConfig, logger)
 	}
 
-	// Set timezone to PGX runtime
-	if s := os.Getenv("TZ"); s != "" {
-		connectConf.ConnConfig.RuntimeParams["timezone"] = s
-	}
-
-	// Register Decimal Data Type to PGX Pool
-	connectConf.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		pgxdecimal.Register(conn.TypeMap())
-		return nil
-	}
-
-	pgdb.DB, err = pgxpool.NewWithConfig(context.Background(), connectConf)
-	if err != nil {
-		pgdb.logger.Errorf("Error connecting to postgres: %+v")
-		return nil, err
-	}
-
-	pgdb.Config = config
-
-	return pgdb, nil
+	return nil, errors.New("unsupported database type")
 }
 
 func (pgdb *PostgresqlDB) Close() error {

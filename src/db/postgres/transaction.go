@@ -1,20 +1,16 @@
-package db
+package postgres
 
 import (
 	"context"
 
-	"github.com/oatsaysai/simple-core-bank/src/model"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/model"
 )
 
-type DBTransactionInterface interface {
-	GetTransactionByAccountNo(accountNo string) ([]model.Transaction, error)
-}
-
-func (pgdb *PostgresqlDB) GetTransactionByAccountNo(accountNo string) ([]model.Transaction, error) {
+func (pgdb *PostgresqlDB) GetTransactionByAccountNo(ctx context.Context, accountNo string) ([]model.Transaction, error) {
 
 	txs := []model.Transaction{}
 	err := pgdb.DB.QueryRow(
-		context.Background(),
+		ctx,
 		`
 		SELECT
 			COALESCE(jsonb_agg(d.*), '[]') as rows

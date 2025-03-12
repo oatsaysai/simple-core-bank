@@ -1,4 +1,7 @@
 #!/bin/sh
 
-docker exec -i simple-core-bank-postgres psql -U postgres -c "drop database if exists simple_core_bank" &&
-docker exec -i simple-core-bank-postgres psql -U postgres -c "create database simple_core_bank"
+DB_NAME="go-http-server-template"
+CONTAINER_NAME="go-http-server-template-postgres"
+
+docker exec -i "$CONTAINER_NAME" psql -U postgres -c "DROP DATABASE IF EXISTS \"$DB_NAME\";" &&
+docker exec -i "$CONTAINER_NAME" psql -U postgres -c "CREATE DATABASE \"$DB_NAME\";"

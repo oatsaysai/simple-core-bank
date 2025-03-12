@@ -1,26 +1,19 @@
 package app
 
 import (
-	"math/rand"
-	"time"
-
-	"github.com/oatsaysai/simple-core-bank/src/custom_error"
-	log "github.com/oatsaysai/simple-core-bank/src/logger"
-	"github.com/oatsaysai/simple-core-bank/src/model"
 	"github.com/shopspring/decimal"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/custom_error"
+	log "repo.blockfint.com/sakkarin/go-http-server-template/src/logger"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/model"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
-func (ctx *Context) PreGenerateAccountNumbers(params model.PreGenerateAccountNoParams) (*model.PreGenerateAccountNoResponse, error) {
-	logger := ctx.getLogger()
+func (ctx *Context) PreGenerateAccountNumbers(params *model.PreGenerateAccountNoParams) (*model.PreGenerateAccountNoResponse, error) {
+	logger := ctx.Logger
 	logger = logger.WithFields(log.Fields{
 		"func": "PreGenerateAccountNumbers",
 	})
 	logger.Info("Begin")
-	logger.Debugf("params: %v", params)
+	logger.Debugf("params: %+v", params)
 	defer logger.Info("End")
 
 	if err := ValidateInput(params); err != nil {
@@ -29,7 +22,7 @@ func (ctx *Context) PreGenerateAccountNumbers(params model.PreGenerateAccountNoP
 	}
 
 	// Pre-generate account numbers
-	err := ctx.DB.PreGenerateAccountNo(params.BatchSize)
+	err := ctx.DB.PreGenerateAccountNo(ctx.FiberCtx.Context(), params.BatchSize)
 	if err != nil {
 		logger.Errorf("Failed to pre-generate account numbers: %s", err)
 		return nil, &custom_error.InternalError{
@@ -44,13 +37,13 @@ func (ctx *Context) PreGenerateAccountNumbers(params model.PreGenerateAccountNoP
 	}, nil
 }
 
-func (ctx *Context) CreateAccount(params model.CreateAccountParams) (*model.CreateAccountResponse, error) {
-	logger := ctx.getLogger()
+func (ctx *Context) CreateAccount(params *model.CreateAccountParams) (*model.CreateAccountResponse, error) {
+	logger := ctx.Logger
 	logger = logger.WithFields(log.Fields{
 		"func": "CreateAccount",
 	})
 	logger.Info("Begin")
-	logger.Debugf("params: %v", params)
+	logger.Debugf("params: %+v", params)
 	defer logger.Info("End")
 
 	if err := ValidateInput(params); err != nil {
@@ -59,7 +52,7 @@ func (ctx *Context) CreateAccount(params model.CreateAccountParams) (*model.Crea
 	}
 
 	// Get the next available account number, mark it as used and insert it into accounts
-	accountNo, err := ctx.DB.GetAccountNoAndInsertAccount(params.AccountName, decimal.NewFromInt(0))
+	accountNo, err := ctx.DB.GetAccountNoAndInsertAccount(ctx.FiberCtx.Context(), params.AccountName, decimal.NewFromInt(0))
 	if err != nil {
 		logger.Errorf("Failed to get and mark next available account number as used and insert it: %s", err)
 		return nil, &custom_error.InternalError{
@@ -75,12 +68,12 @@ func (ctx *Context) CreateAccount(params model.CreateAccountParams) (*model.Crea
 }
 
 func (ctx *Context) GetAccount(params *model.GetAccountParams) (*model.GetAccountResponse, error) {
-	logger := ctx.getLogger()
+	logger := ctx.Logger
 	logger = logger.WithFields(log.Fields{
 		"func": "GetAccount",
 	})
 	logger.Info("Begin")
-	logger.Debugf("params: %v", params)
+	logger.Debugf("params: %+v", params)
 	defer logger.Info("End")
 
 	if err := ValidateInput(params); err != nil {
@@ -89,7 +82,7 @@ func (ctx *Context) GetAccount(params *model.GetAccountParams) (*model.GetAccoun
 	}
 
 	accountNo := params.AccountNo
-	accNo, accName, balance, err := ctx.DB.GetAccount(accountNo)
+	accNo, accName, balance, err := ctx.DB.GetAccount(ctx.FiberCtx.Context(), accountNo)
 	if err != nil {
 		logger.Errorf("Failed to get account: %s", err)
 		return nil, &custom_error.UserError{

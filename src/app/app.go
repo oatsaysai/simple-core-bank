@@ -8,9 +8,9 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
-	"github.com/oatsaysai/simple-core-bank/src/custom_error"
-	"github.com/oatsaysai/simple-core-bank/src/db"
-	log "github.com/oatsaysai/simple-core-bank/src/logger"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/custom_error"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/db"
+	log "repo.blockfint.com/sakkarin/go-http-server-template/src/logger"
 )
 
 var (
@@ -85,7 +85,7 @@ func (app *App) Close() error {
 	return nil
 }
 
-func ValidateInput(input interface{}) *custom_error.ValidationError {
+func ValidateInput(input any) *custom_error.ValidationError {
 	err := validate.Struct(input)
 	if err != nil {
 		messages := make([]string, 0)

@@ -6,11 +6,11 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/oatsaysai/simple-core-bank/src/db/migrations"
-	log "github.com/oatsaysai/simple-core-bank/src/logger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/db/postgres/migrations"
+	log "repo.blockfint.com/sakkarin/go-http-server-template/src/logger"
 )
 
 var migrateDbCmd = &cobra.Command{
@@ -19,18 +19,18 @@ var migrateDbCmd = &cobra.Command{
 		number, _ := cmd.Flags().GetInt("number")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 
-		dbHost := viper.GetString("PostgreSQL.DBHost")
-		dbPort := viper.GetString("PostgreSQL.DBPort")
-		dbUser := viper.GetString("PostgreSQL.DBUsername")
+		dbHost := viper.GetString("Database.PostgreSQL.DBHost")
+		dbPort := viper.GetString("Database.PostgreSQL.DBPort")
+		dbUser := viper.GetString("Database.PostgreSQL.DBUsername")
 		if dbUser == "" {
 			dbUser = "postgres"
 		}
-		dbPassword := viper.GetString("PostgreSQL.DBPassword")
+		dbPassword := viper.GetString("Database.PostgreSQL.DBPassword")
 		if dbPassword == "" {
 			dbPassword = "postgres"
 		}
-		dbName := viper.GetString("PostgreSQL.DBName")
-		dbSchemaName := viper.GetString("PostgreSQL.DBSchemaName")
+		dbName := viper.GetString("Database.PostgreSQL.DBName")
+		dbSchemaName := viper.GetString("Database.PostgreSQL.DBSchemaName")
 
 		logColor := viper.GetBool("Log.Color")
 		logJSON := viper.GetBool("Log.JSON")

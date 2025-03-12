@@ -1,11 +1,11 @@
-package db
+package postgres
 
 import (
 	"context"
 
-	"github.com/oatsaysai/simple-core-bank/src/custom_error"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/custom_error"
 )
 
 type TransactionType string
@@ -16,24 +16,18 @@ const (
 	TRANSFER_OUT TransactionType = "transfer-out"
 )
 
-type DBTransferInterface interface {
-	TransferIn(toAccountNo string, amount decimal.Decimal) (*int64, error)
-	TransferOut(fromAccountNo string, amount decimal.Decimal) (*int64, error)
-	Transfer(fromAccountNo, toAccountNo string, amount decimal.Decimal) (*int64, error)
-}
-
-func (pgdb *PostgresqlDB) TransferIn(toAccountNo string, amount decimal.Decimal) (*int64, error) {
+func (pgdb *PostgresqlDB) TransferIn(ctx context.Context, toAccountNo string, amount decimal.Decimal) (*int64, error) {
 	logger := pgdb.logger
 
-	tx, err := pgdb.DB.Begin(context.Background())
+	tx, err := pgdb.DB.Begin(ctx)
 	if err != nil {
 		logger.Errorf("%+v", err)
 		return nil, errors.Wrap(err, "Unable to make a transaction")
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
 	_, err = tx.Exec(
-		context.Background(),
+		ctx,
 		`
 			SET TRANSACTION ISOLATION LEVEL READ COMMITTED
 		`,
@@ -44,7 +38,7 @@ func (pgdb *PostgresqlDB) TransferIn(toAccountNo string, amount decimal.Decimal)
 	}
 
 	cmdTag, err := tx.Exec(
-		context.Background(),
+		ctx,
 		`
 			UPDATE accounts
 				SET balance = balance + $2
@@ -67,7 +61,7 @@ func (pgdb *PostgresqlDB) TransferIn(toAccountNo string, amount decimal.Decimal)
 
 	var transactionID int64
 	tx.QueryRow(
-		context.Background(),
+		ctx,
 		`
 			INSERT INTO transactions(
 				to_account_no,
@@ -82,7 +76,7 @@ func (pgdb *PostgresqlDB) TransferIn(toAccountNo string, amount decimal.Decimal)
 		TRANSFER_IN,
 	).Scan(&transactionID)
 
-	err = tx.Commit(context.Background())
+	err = tx.Commit(ctx)
 	if err != nil {
 		logger.Errorf("%+v", err)
 		return nil, errors.Wrap(err, "Unable to commit a transaction")
@@ -91,18 +85,18 @@ func (pgdb *PostgresqlDB) TransferIn(toAccountNo string, amount decimal.Decimal)
 	return &transactionID, nil
 }
 
-func (pgdb *PostgresqlDB) TransferOut(fromAccountNo string, amount decimal.Decimal) (*int64, error) {
+func (pgdb *PostgresqlDB) TransferOut(ctx context.Context, fromAccountNo string, amount decimal.Decimal) (*int64, error) {
 	logger := pgdb.logger
 
-	tx, err := pgdb.DB.Begin(context.Background())
+	tx, err := pgdb.DB.Begin(ctx)
 	if err != nil {
 		logger.Errorf("%+v", err)
 		return nil, errors.Wrap(err, "Unable to make a transaction")
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
 	_, err = tx.Exec(
-		context.Background(),
+		ctx,
 		`
 			SET TRANSACTION ISOLATION LEVEL READ COMMITTED
 		`,
@@ -113,7 +107,7 @@ func (pgdb *PostgresqlDB) TransferOut(fromAccountNo string, amount decimal.Decim
 	}
 
 	cmdTag, err := tx.Exec(
-		context.Background(),
+		ctx,
 		`
 			UPDATE accounts
 				SET balance = balance - $2
@@ -139,7 +133,7 @@ func (pgdb *PostgresqlDB) TransferOut(fromAccountNo string, amount decimal.Decim
 
 	var transactionID int64
 	tx.QueryRow(
-		context.Background(),
+		ctx,
 		`
 			INSERT INTO transactions(
 				from_account_no,
@@ -154,7 +148,7 @@ func (pgdb *PostgresqlDB) TransferOut(fromAccountNo string, amount decimal.Decim
 		TRANSFER_OUT,
 	).Scan(&transactionID)
 
-	err = tx.Commit(context.Background())
+	err = tx.Commit(ctx)
 	if err != nil {
 		logger.Errorf("%+v", err)
 		return nil, errors.Wrap(err, "Unable to commit a transaction")
@@ -163,9 +157,8 @@ func (pgdb *PostgresqlDB) TransferOut(fromAccountNo string, amount decimal.Decim
 	return &transactionID, nil
 }
 
-func (pgdb *PostgresqlDB) Transfer(fromAccountNo, toAccountNo string, amount decimal.Decimal) (*int64, error) {
+func (pgdb *PostgresqlDB) Transfer(ctx context.Context, fromAccountNo, toAccountNo string, amount decimal.Decimal) (*int64, error) {
 	logger := pgdb.logger
-	ctx := context.Background()
 
 	handleError := func(err error, message string) error {
 		logger.Errorf("%+v", err)
@@ -176,7 +169,7 @@ func (pgdb *PostgresqlDB) Transfer(fromAccountNo, toAccountNo string, amount dec
 	if err != nil {
 		return nil, handleError(err, "Unable to make a transaction")
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
 	if _, err = tx.Exec(ctx, `SET TRANSACTION ISOLATION LEVEL READ COMMITTED`); err != nil {
 		return nil, handleError(err, "Failed to set transaction isolation level")

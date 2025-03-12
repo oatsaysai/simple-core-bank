@@ -1,6 +1,6 @@
 package main
 
-import "github.com/oatsaysai/simple-core-bank/src/cmd"
+import "repo.blockfint.com/sakkarin/go-http-server-template/src/cmd"
 
 func main() {
 	cmd.Execute()

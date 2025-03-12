@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Pull From Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/oatsaysai/simple-core-bank.git'
+                git branch: 'main', url: 'https://repo.blockfint.com/sakkarin/go-http-server-template.git'
             }
         }
         stage('Docker Build') {

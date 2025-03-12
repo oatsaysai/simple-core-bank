@@ -1,17 +1,17 @@
 package app
 
 import (
-	log "github.com/oatsaysai/simple-core-bank/src/logger"
-	"github.com/oatsaysai/simple-core-bank/src/model"
+	log "repo.blockfint.com/sakkarin/go-http-server-template/src/logger"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/model"
 )
 
 func (ctx *Context) GetTransactionByAccountNo(params *model.GetTransactionParams) ([]model.Transaction, error) {
-	logger := ctx.getLogger()
+	logger := ctx.Logger
 	logger = logger.WithFields(log.Fields{
 		"func": "GetTransactionByAccountNo",
 	})
 	logger.Info("Begin")
-	logger.Debugf("params: %v", params)
+	logger.Debugf("params: %+v", params)
 	defer logger.Info("End")
 
 	if err := ValidateInput(params); err != nil {
@@ -19,5 +19,5 @@ func (ctx *Context) GetTransactionByAccountNo(params *model.GetTransactionParams
 		return nil, err
 	}
 
-	return ctx.DB.GetTransactionByAccountNo(params.AccountNo)
+	return ctx.DB.GetTransactionByAccountNo(ctx.FiberCtx.Context(), params.AccountNo)
 }

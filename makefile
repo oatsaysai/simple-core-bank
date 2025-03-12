@@ -9,12 +9,12 @@ stop-db:
 	./tools/stop_postgresql_docker.sh
 
 build-docker-image:
-	docker build -t simple-core-bank .
+	docker build -t go-http-server-template .
 	./tools/remove_all_none_image.sh
 
 build:
-	go build -o simple-core-bank src/main.go
+	go build -o go-http-server-template src/main.go
 
 run-without-build:
-	./simple-core-bank migrate-db
-	./simple-core-bank serve-http-api
+	./go-http-server-template migrate-db
+	./go-http-server-template serve-http-api

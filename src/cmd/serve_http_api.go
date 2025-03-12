@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/oatsaysai/simple-core-bank/src/app"
-	"github.com/oatsaysai/simple-core-bank/src/http_api"
 	"github.com/spf13/cobra"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/app"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/handlers/routes"
 )
 
 func init() {
@@ -28,12 +25,13 @@ var serveBackOfficeAPICmd = &cobra.Command{
 			return err
 		}
 
-		fiberApp := fiber.New()
-		httpAPI, err := http_api.New(fiberApp, app)
+		config, err := routes.InitConfig()
 		if err != nil {
 			return err
 		}
 
-		return fiberApp.Listen(fmt.Sprintf(":%d", httpAPI.Config.Port))
+		routes.NewRouter(config, logger, app)
+
+		return nil
 	},
 }

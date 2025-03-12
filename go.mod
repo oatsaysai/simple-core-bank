@@ -1,6 +1,6 @@
-module github.com/oatsaysai/simple-core-bank
+module repo.blockfint.com/sakkarin/go-http-server-template
 
-go 1.19
+go 1.24.1
 
 require (
 	github.com/go-playground/locales v0.14.1

@@ -1,11 +1,11 @@
-# simple-core-bank
+# go-http-server-template
 
 ## Prerequisites
 
 - Make
 - Docker 24 or later
-- Go 1.19 or later
-- PostgreSQL 14 or later
+- Go 1.24.1 or later
+- PostgreSQL 16 or later
 
 ## How to run with docker-compose
 
@@ -31,6 +31,12 @@ make start-db
 
 ```sh
 make run
+```
+
+3. Stop PostgreSQL docker
+
+```sh
+make stop-db
 ```
 
 ## Load test

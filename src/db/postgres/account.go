@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"context"
@@ -6,25 +6,17 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/shopspring/decimal"
 )
 
-type DBAccountInterface interface {
-	GetAccount(accountNo string) (*string, *string, *decimal.Decimal, error)
-	AccountExists(accountNo string) (bool, error)
-	GetAccountNoAndInsertAccount(accountName string, balance decimal.Decimal) (string, error)
-	PreGenerateAccountNo(batchSize int) error
-}
-
-func (pgdb *PostgresqlDB) PreGenerateAccountNo(batchSize int) error {
+func (pgdb *PostgresqlDB) PreGenerateAccountNo(ctx context.Context, batchSize int) error {
 	logger := pgdb.logger
 
 	// Query the largest account number
 	var latestAccountNo sql.NullString
-	err := pgdb.DB.QueryRow(context.Background(), `SELECT MAX(account_no) FROM pregen_acc_no`).Scan(&latestAccountNo)
+	err := pgdb.DB.QueryRow(ctx, `SELECT MAX(account_no) FROM pregen_acc_no`).Scan(&latestAccountNo)
 
 	// Initialize latestNumber to 0
 	latestNumber := 0
@@ -47,20 +39,19 @@ func (pgdb *PostgresqlDB) PreGenerateAccountNo(batchSize int) error {
 	}
 
 	// Generate new account numbers
-	rows := [][]interface{}{}
+	rows := [][]any{}
 	for i := 0; i < batchSize; i++ {
-		rows = append(rows, []interface{}{
+		rows = append(rows, []any{
 			fmt.Sprintf("%010d", latestNumber+i+1),
 		})
 	}
 
 	// Shuffle account numbers
-	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(rows), func(i, j int) { rows[i], rows[j] = rows[j], rows[i] })
 
 	// Execute batch insert operation
 	_, err = pgdb.DB.CopyFrom(
-		context.Background(),
+		ctx,
 		pgx.Identifier{"pregen_acc_no"},
 		[]string{"account_no"},
 		pgx.CopyFromRows(rows),
@@ -74,7 +65,7 @@ func (pgdb *PostgresqlDB) PreGenerateAccountNo(batchSize int) error {
 	return nil
 }
 
-func (pgdb *PostgresqlDB) GetAccountNoAndInsertAccount(accountName string, balance decimal.Decimal) (string, error) {
+func (pgdb *PostgresqlDB) GetAccountNoAndInsertAccount(ctx context.Context, accountName string, balance decimal.Decimal) (string, error) {
 	var accountNo string
 	logger := pgdb.logger
 
@@ -86,7 +77,7 @@ func (pgdb *PostgresqlDB) GetAccountNoAndInsertAccount(accountName string, balan
 	defer tx.Rollback(context.Background())
 
 	err = tx.QueryRow(
-		context.Background(),
+		ctx,
 		"SELECT account_no FROM pregen_acc_no WHERE id = (SELECT nextval('available_acc_no_id'))",
 	).Scan(&accountNo)
 	if err != nil {
@@ -94,7 +85,7 @@ func (pgdb *PostgresqlDB) GetAccountNoAndInsertAccount(accountName string, balan
 		return "", fmt.Errorf("failed to scan account number: %w", err)
 	}
 
-	_, err = tx.Exec(context.Background(),
+	_, err = tx.Exec(ctx,
 		`
 		INSERT INTO accounts(
 			account_no,
@@ -121,7 +112,7 @@ func (pgdb *PostgresqlDB) GetAccountNoAndInsertAccount(accountName string, balan
 	return accountNo, nil
 }
 
-func (pgdb *PostgresqlDB) AccountExists(accountNo string) (bool, error) {
+func (pgdb *PostgresqlDB) AccountExists(ctx context.Context, accountNo string) (bool, error) {
 	var exists bool
 
 	query := `
@@ -132,7 +123,7 @@ func (pgdb *PostgresqlDB) AccountExists(accountNo string) (bool, error) {
 		);
 	`
 
-	err := pgdb.DB.QueryRow(context.Background(), query, accountNo).Scan(&exists)
+	err := pgdb.DB.QueryRow(ctx, query, accountNo).Scan(&exists)
 	if err != nil {
 		pgdb.logger.Errorf("Failed to check if account exists with account no %s: %v", accountNo, err)
 		return false, err
@@ -147,7 +138,7 @@ func (pgdb *PostgresqlDB) AccountExists(accountNo string) (bool, error) {
 	return exists, nil
 }
 
-func (pgdb *PostgresqlDB) GetAccount(accountNo string) (*string, *string, *decimal.Decimal, error) {
+func (pgdb *PostgresqlDB) GetAccount(ctx context.Context, accountNo string) (*string, *string, *decimal.Decimal, error) {
 	var accountName string
 	var balance decimal.Decimal
 
@@ -157,7 +148,7 @@ func (pgdb *PostgresqlDB) GetAccount(accountNo string) (*string, *string, *decim
 		WHERE account_no = $1;
 	`
 
-	err := pgdb.DB.QueryRow(context.Background(), query, accountNo).Scan(&accountName, &balance)
+	err := pgdb.DB.QueryRow(ctx, query, accountNo).Scan(&accountName, &balance)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			pgdb.logger.Errorf("No account found with account number %s", accountNo)

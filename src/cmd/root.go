@@ -5,14 +5,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oatsaysai/simple-core-bank/src/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"repo.blockfint.com/sakkarin/go-http-server-template/src/logger"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "simple-core-bank",
-	Short: "simple-core-bank",
+	Use:   "go-http-server-template",
+	Short: "go-http-server-template",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
 	},

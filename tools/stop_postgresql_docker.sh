@@ -1,5 +1,5 @@
 #!/bin/sh
 
-docker stop simple-core-bank-postgres
-docker rm simple-core-bank-postgres
+docker stop go-http-server-template-postgres
+docker rm go-http-server-template-postgres
 

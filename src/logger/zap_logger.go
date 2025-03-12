@@ -77,92 +77,92 @@ func newZapLogger(config Configuration) (Logger, error) {
 	}, nil
 }
 
-func (l *zapLogger) Debugf(format string, args ...interface{}) {
+func (l *zapLogger) Debugf(format string, args ...any) {
 	l.sugaredLogger.Debugf(format, args...)
 }
 
-func (l *zapLogger) Infof(format string, args ...interface{}) {
+func (l *zapLogger) Infof(format string, args ...any) {
 	l.sugaredLogger.Infof(format, args...)
 }
 
-func (l *zapLogger) Warnf(format string, args ...interface{}) {
+func (l *zapLogger) Warnf(format string, args ...any) {
 	l.sugaredLogger.Warnf(format, args...)
 }
 
-func (l *zapLogger) Errorf(format string, args ...interface{}) {
+func (l *zapLogger) Errorf(format string, args ...any) {
 	l.sugaredLogger.Errorf(format, args...)
 }
 
-func (l *zapLogger) Fatalf(format string, args ...interface{}) {
+func (l *zapLogger) Fatalf(format string, args ...any) {
 	l.sugaredLogger.Fatalf(format, args...)
 }
 
-func (l *zapLogger) Panicf(format string, args ...interface{}) {
+func (l *zapLogger) Panicf(format string, args ...any) {
 	l.sugaredLogger.Panicf(format, args...)
 }
 
-func (l *zapLogger) Debug(args ...interface{}) {
+func (l *zapLogger) Debug(args ...any) {
 	l.sugaredLogger.Debug(args...)
 }
 
-func (l *zapLogger) Debugln(args ...interface{}) {
+func (l *zapLogger) Debugln(args ...any) {
 	l.sugaredLogger.Debug(args...)
 }
 
-func (l *zapLogger) Error(args ...interface{}) {
+func (l *zapLogger) Error(args ...any) {
 	l.sugaredLogger.Error(args...)
 }
 
-func (l *zapLogger) Errorln(args ...interface{}) {
+func (l *zapLogger) Errorln(args ...any) {
 	l.sugaredLogger.Error(args...)
 }
 
-func (l *zapLogger) Fatal(args ...interface{}) {
+func (l *zapLogger) Fatal(args ...any) {
 	l.sugaredLogger.Fatal(args...)
 }
 
-func (l *zapLogger) Fatalln(args ...interface{}) {
+func (l *zapLogger) Fatalln(args ...any) {
 	l.sugaredLogger.Fatal(args...)
 }
 
-func (l *zapLogger) Info(args ...interface{}) {
+func (l *zapLogger) Info(args ...any) {
 	l.sugaredLogger.Info(args...)
 }
 
-func (l *zapLogger) Warn(args ...interface{}) {
+func (l *zapLogger) Warn(args ...any) {
 	l.sugaredLogger.Warn(args...)
 }
 
-func (l *zapLogger) Warnln(args ...interface{}) {
+func (l *zapLogger) Warnln(args ...any) {
 	l.sugaredLogger.Warn(args...)
 }
 
-func (l *zapLogger) Infoln(args ...interface{}) {
+func (l *zapLogger) Infoln(args ...any) {
 	l.sugaredLogger.Info(args...)
 }
 
-func (l *zapLogger) Panic(args ...interface{}) {
+func (l *zapLogger) Panic(args ...any) {
 	l.sugaredLogger.Panic(args...)
 }
 
-func (l *zapLogger) Panicln(args ...interface{}) {
+func (l *zapLogger) Panicln(args ...any) {
 	l.sugaredLogger.Panic(args...)
 }
 
-func (l *zapLogger) Print(args ...interface{}) {
+func (l *zapLogger) Print(args ...any) {
 	l.sugaredLogger.Debug(args...)
 }
 
-func (l *zapLogger) Println(args ...interface{}) {
+func (l *zapLogger) Println(args ...any) {
 	l.sugaredLogger.Debug(args...)
 }
 
-func (l *zapLogger) Printf(format string, args ...interface{}) {
+func (l *zapLogger) Printf(format string, args ...any) {
 	l.sugaredLogger.Debugf(format, args...)
 }
 
 func (l *zapLogger) WithFields(fields Fields) Logger {
-	var f = make([]interface{}, 0)
+	var f = make([]any, 0)
 	for k, v := range fields {
 		f = append(f, k)
 		f = append(f, v)
